@@ -6,10 +6,11 @@
 # VS Code (PlatformIO regenerates these)
 .vscode/
 
-# Build / capture artifacts
+# Build artifacts
 *.bin
-dump.bin
-*.csv
+
+# NOTE: your session-2 gesture recordings (*.csv) ARE meant to be committed.
+# Don't add *.csv here — you need them in the repo for session 3.
 
 # OS
 .DS_Store
