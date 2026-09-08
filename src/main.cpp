@@ -52,9 +52,9 @@ void setup() {
 void loop() {
   neopixelWrite(RGB_LED_PIN, 0, 24, 0);       // dim green (r, g, b)
   Serial.println("blink: on");
-  delay(500);
+  delay(1500);
 
   neopixelWrite(RGB_LED_PIN, 0, 0, 0);        // off
   Serial.println("blink: off");
-  delay(500);
+  delay(1500);
 }
