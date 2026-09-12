@@ -34,10 +34,78 @@ void setup() {
   Serial.println("Plain LED blinking on GPIO40.");
 }
 
+/*
 void loop() {
   digitalWrite(LED_PIN, HIGH);   // on
-  delay(1500);                    // <-- wait half a second
-
+  delay(1500);                    // <-- wait one and a half second
+  
   digitalWrite(LED_PIN, LOW);    // off
   delay(1500);                    // <-- and again
+}
+*/
+
+const int unit = 500; // 0.5s
+
+void dot (){
+    digitalWrite(LED_PIN, HIGH);   // on
+    delay(unit);
+    digitalWrite(LED_PIN, LOW);    // off
+    delay(unit);
+}
+
+void dash () {
+    digitalWrite(LED_PIN, HIGH);   // on
+    delay(unit*3);
+    digitalWrite(LED_PIN, LOW);    // off
+    delay(unit);
+}
+
+void gap(){
+    digitalWrite(LED_PIN, LOW);    // off
+    delay(unit*3);
+}
+
+
+
+void loop() {
+
+  gap(); gap(); gap(); gap();
+
+  dot(); dot(); dot(); dot();
+
+  gap(); 
+
+  dot();
+
+  gap(); 
+
+  dot(); dash(); dot(); dot();
+  
+  gap(); 
+
+  dot(); dash(); dot(); dot();
+
+  gap();
+
+  dash(); dash(); dash();
+
+  gap(); gap();
+
+  dot(); dash(); dash();
+
+  gap();
+
+  dash(); dash(); dash();
+
+  gap();
+
+  dot(); dash(); dot();
+
+  gap();
+
+  dot(); dash(); dot(); dot();
+
+  gap();
+
+  dash(); dot(); dot();
 }
