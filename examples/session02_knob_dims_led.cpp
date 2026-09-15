@@ -49,7 +49,7 @@
  *      - My chosen axis and threshold.
  *      - The readings I observed in the three poses.
  *      - One thing that surprised me when testing.
- *   5. Commit and push as FINAL: knob dims LED.
+ *   5. Commit and push as FINAL: tilt switches, knob dims.
  *      Submit that commit's link in Moodle with your AI-use line.
  *
  *   Both controls must work; a brightness curve or perfectly flicker-free

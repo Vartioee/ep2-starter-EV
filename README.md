@@ -40,7 +40,7 @@ first to prove your whole toolchain works.
 | `examples/` | Per-session reference sketches — **copy one into `src/main.cpp`** to use it. |
 | `include/` | Headers (e.g. `test_images.h` for session 6). |
 | `lib/` | Libraries — **drop your Edge Impulse model here** (session 4). |
-| `tools/` | Helper scripts (image → C array). |
+| `tools/` | Helper scripts (record/plot CSV, image → C array). |
 | `platformio.ini` | The build recipe (board, libraries, flags). **Don't prune it** — see Notes. |
 | `report-template.md` | The final project report skeleton — copy it into your team repo (session 10). |
 
@@ -54,7 +54,7 @@ out of the build until you copy one in.
 1. In VS Code, **save all files, commit your changes, and push** to your fork.
 2. On GitHub, open **your fork** on `main`: **Sync fork → Update branch**.
 3. Back in VS Code, open **Source Control → … → Pull** (on `main`).
-4. Check that `examples/session02_address_probe.cpp` and `tools/plot_csv.py` have appeared.
+4. Check that `examples/session02_address_probe.cpp`, `tools/record_csv.py` and `tools/plot_csv.py` have appeared.
 
 **Sync fork updates GitHub; Pull updates your laptop.** If either step reports
 conflicts, ask the teacher; keep your own work. The probe is also available in
@@ -72,11 +72,12 @@ Moodle as a backup, so you can continue the lab while resolving a sync problem.
   - Copy `examples/session02_mpu_read.cpp` → `src/main.cpp` → read motion, sanity-check gravity on Z.
   - Debug: copy `examples/session02_address_probe.cpp` → `src/main.cpp`. Change `REQUEST_ADDRESS` **0x68 → 0x69 → 0x68**, uploading each time; compare **ACK → NACK → ACK** with the wires connected. Restore the motion sketch afterwards.
   - Analog first: copy `examples/session02_pot_read.cpp` → `src/main.cpp` → turn the knob, watch the number sweep.
-  - Record CSVs: `pio device monitor --quiet > wave_01.csv` (one file per gesture).
+  - Record CSVs: `python tools/record_csv.py wave_01.csv` (see setup below).
+    Wait for **GO**, perform one activity until **STOP**; it saves ten seconds automatically.
     **Commit and push the CSVs** — you need them in session 3.
   - Plot and compare your recordings with `tools/plot_csv.py` (instructions below).
   - **Homework — tilt switches, knob dims:** combine `examples/session02_knob_dims_led.cpp` with `examples/session02_mpu_read.cpp` in one `src/main.cpp` (one setup/loop). Choose an axis and an acceleration threshold: pointing up enables the LED, held sideways/down switches it off. While enabled, the pot sets brightness; while disabled it stays off. `raw / 16` is fine.
-    Test the three stationary poses and two knob settings. Add three comments: axis/threshold, observed readings, one testing surprise. Commit and push `FINAL: knob dims LED`; submit its link and your AI-use line in Moodle. Flicker reduction is optional; no perceptual brightness curve is required.
+    Test the three stationary poses and two knob settings. Add three comments: axis/threshold, observed readings, one testing surprise. Commit and push `FINAL: tilt switches, knob dims`; submit its link and your AI-use line in Moodle. Flicker reduction is optional; no perceptual brightness curve is required.
 - **Session 3 — train:** upload your CSVs to Edge Impulse and train. *(We install the Edge Impulse CLI together in the lab if we need the live data forwarder — don't fight with it at home.)*
 - **Session 4 — deploy:** export your model as an **Arduino library**, unzip into `lib/`, then work from `examples/session04_deploy.cpp` (edit the `#include` to your project's header).
 - **Session 5 — security:** copy `examples/session05_plant_secret.cpp` → `src/main.cpp`, flash, then dump the flash and find your secret (see that file's header).
@@ -86,34 +87,63 @@ Moodle as a backup, so you can continue the lab while resolving a sync problem.
 
 ---
 
-## If `pio` is not found
+## Record your session-2 CSV files
 
-PlatformIO IDE already includes the command-line tools. A regular terminal may
-not have them on its PATH. In VS Code, open:
+First **Sync fork → Update branch**, then **Pull** in VS Code to get
+`tools/record_csv.py`. Upload `examples/session02_mpu_read.cpp` as `src/main.cpp`,
+connect through the board's **UART** USB socket, and **close Serial Monitor**.
 
-**PlatformIO (ant icon) → Quick Access → Miscellaneous → PlatformIO Core CLI**
-
-Run `pio --version` in that terminal, then run the recording command from your
-project folder. Close the Serial Monitor first. If the menu is missing, enable
-or install the **PlatformIO IDE** extension and let its initial setup finish.
-You do not need a second PlatformIO installation.
-
-If you still need a direct command, these use the default installation paths.
-In **Windows PowerShell**:
-
-```powershell
-& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" device monitor --baud 115200 --quiet > wave_01.csv
-```
-
-On **Mac/Linux**:
+In VS Code, open **PlatformIO (ant icon) → Quick Access → Miscellaneous →
+PlatformIO Core CLI**. From your project folder:
 
 ```bash
-~/.platformio/penv/bin/pio device monitor --baud 115200 --quiet > wave_01.csv
+python tools/record_csv.py wave_01.csv
 ```
 
-Press **Ctrl+C** after the take. Use a different filename for each take.
-Windows PowerShell may save UTF-16; inspect and save cleaned CSVs as UTF-8 for
-next session. The plotter can read both encodings.
+Wait for the countdown and **GO**, then wave continuously until **STOP**.
+The script records **10 seconds at 115200 baud** and saves three columns
+(x,y,z in m/s²) as UTF-8, without a header. Repeat with `shake_01.csv` and
+`idle_01.csv`; choose a new number for each additional take. **Do not add `>`**:
+this script writes the file itself. `pio device monitor` is an interactive
+viewer; redirecting it is not the recording workflow.
+
+**Python/`pio` not found, or “pyserial is missing”?** PlatformIO IDE includes
+its own Python and pyserial. A regular terminal may use another Python or
+lack `pio` on PATH. Use the Core CLI above, or these default-install paths
+from your project folder; no second installation is needed:
+
+Windows **PowerShell**:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\python.exe" tools/record_csv.py wave_01.csv
+```
+
+**Mac/Linux**:
+
+```bash
+~/.platformio/penv/bin/python tools/record_csv.py wave_01.csv
+```
+
+If the PlatformIO menu is missing, enable/install the **PlatformIO IDE**
+extension and let its setup finish. Custom installations may use another path.
+
+- **Port selection:** one detected USB serial port is selected automatically.
+  Otherwise run `python tools/record_csv.py --list-ports`, then specify it:
+  `python tools/record_csv.py wave_01.csv --port COM3` (example Windows port).
+  On Mac use the listed `/dev/cu.…` path. Use the same Python prefix as above
+  if needed. Listing ports does not open them.
+- **Port busy / no readings:** close other monitors; check the UART cable,
+  uploaded sketch and port. On Windows, a missing COM port may need the
+  [CP210x driver](https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers).
+- **Existing filename:** the script refuses to overwrite it, even if it is
+  empty from an earlier failed command. Use another take number.
+- **Bad/interrupted take:** startup text is ignored before GO. During the take,
+  malformed data or a one-second silence is an error; Ctrl+C also cancels.
+  The newly created incomplete file is removed, and you can retry. Previously
+  saved files are never removed. Wait for **“STOP. Saved … rows”** for success.
+- **Inspect and plot:** expect a few hundred rows. The script does not resample
+  or add timestamps; ten seconds of capture does not guarantee exactly 500 rows
+  or prove regular timing. `--seconds 20` changes the duration if needed.
 
 ---
 
