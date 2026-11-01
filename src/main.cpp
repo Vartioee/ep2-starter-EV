@@ -18,10 +18,9 @@
 // 👇 CHANGE THIS to your Edge Impulse project's header:
 #include <vartioee-project-1_inferencing.h>
 
-const char* ssid = "Savonia-IoT";
-const char* password = "SuperSecret123"; // "temporary"... ships forever
-
 Adafruit_MPU6050 mpu;
+
+const int LED_PIN = 40;
 
 float buffer[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE];   // the window — allocated once
 int   i = 0;                                        // fill position
@@ -47,14 +46,16 @@ void act_on(ei_impulse_result_t &result) {
     Serial.printf(">> Detected: %s (%.1f%%)\n", label, best_val * 100.0f);
 
     if (strcmp(label, "shake") == 0) {
-      // Trigger action for "shake"
+      digitalWrite(LED_PIN, HIGH);
+      Serial.println("Shake detected LED ON.");
       delay(200);
       
     } else if (strcmp(label, "wave") == 0) {
       // Trigger action for "wave"
-      Serial.println("Action: Wave detected! Performing task...");
+      Serial.println("Wave detected");
       
     } else if (strcmp(label, "idle") == 0) {
+      digitalWrite(LED_PIN, LOW);
       // Keep outputs in safe default state
     }
   }
@@ -63,6 +64,10 @@ void act_on(ei_impulse_result_t &result) {
 void setup() {
   Serial.begin(115200);
   delay(300);
+
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+
   Wire.begin(8, 9);
   if (!mpu.begin()) { Serial.println("MPU not found"); while (true) delay(1000); }
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
@@ -75,12 +80,16 @@ void loop() {
   buffer[i++] = a.acceleration.y;
   buffer[i++] = a.acceleration.z;
 
-  if (i >= EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE) {
+if (i >= EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE) {
     signal_t signal;
     numpy::signal_from_buffer(buffer, EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE, &signal);
 
     ei_impulse_result_t result;
     run_classifier(&signal, &result, false);
+
+    Serial.printf("Inference: %d ms\n",
+                  result.timing.classification);
+
     act_on(result);
     i = 0;
   }
