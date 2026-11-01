@@ -51,12 +51,11 @@ void act_on(ei_impulse_result_t &result) {
       delay(200);
       
     } else if (strcmp(label, "wave") == 0) {
-      // Trigger action for "wave"
       Serial.println("Wave detected");
       
     } else if (strcmp(label, "idle") == 0) {
       digitalWrite(LED_PIN, LOW);
-      // Keep outputs in safe default state
+      Serial.println("Idle detected LED OFF.");
     }
   }
 }
