@@ -22,5 +22,4 @@ __pycache__/
 
 # Library dependencies
 lib/*/
-lib/README.md
 strings.txt
