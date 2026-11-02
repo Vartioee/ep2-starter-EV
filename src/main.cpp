@@ -84,10 +84,11 @@ if (i >= EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE) {
     numpy::signal_from_buffer(buffer, EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE, &signal);
 
     ei_impulse_result_t result;
-    run_classifier(&signal, &result, false);
+    unsigned long t0 = millis();
+    EI_IMPULSE_ERROR err = run_classifier(&signal, &result, false);
+    unsigned long ms = millis() - t0;  
 
-    Serial.printf("Inference: %d ms\n",
-                  result.timing.classification);
+    Serial.printf("Inference: %d ms\n", ms);
 
     act_on(result);
     i = 0;
